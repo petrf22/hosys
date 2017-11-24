@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:padding="@dimen/appbar_padding_top"
+              android:weightSum="1">
+
+    <TextView
+        android:text="@string/dialog_soutez_uroven_1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/prefTextUroven1" />
+
+    <Spinner
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/spinnerUroven1"
+        android:spinnerMode="dialog" />
+
+    <TextView
+        android:text="@string/dialog_soutez_uroven_2"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/prefTextUroven2" />
+
+    <Spinner
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/spinnerUroven2"
+        android:spinnerMode="dialog" />
+
+    <TextView
+        android:text="@string/dialog_soutez_soutez"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/prefTextSoutez" />
+
+    <Spinner
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/spinnerUroven3"
+        android:spinnerMode="dialog" />
+
+</LinearLayout>

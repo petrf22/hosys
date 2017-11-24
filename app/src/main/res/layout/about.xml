@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content">
+
+    <ImageView
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:scaleType="center"
+        android:src="@mipmap/ic_launcher"
+        android:layout_gravity="top|left"
+        android:layout_marginTop="32dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/info_text"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dip"
+            />
+        <TextView
+            android:id="@+id/legal_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12dip"
+            android:textStyle="italic"
+            android:layout_span="2"
+            android:layout_margin="8dip"
+            android:textColor="#cccccc"
+            android:scrollbars="vertical"/>
+    </LinearLayout>
+</FrameLayout>

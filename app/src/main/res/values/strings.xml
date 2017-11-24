@@ -1,0 +1,99 @@
+<resources>
+    <string name="app_name">Hosys (neoficiální)</string>
+    <string name="action_settings">Nastavení</string>
+    <string name="action_refresh">Aktualizace</string>
+    <string name="downloading_data_format"><![CDATA[<!DOCTYPE html><html><head><meta charset="UTF-8"><body>Načítám data ze serveru %1$s ...</body></html>]]></string>
+    <string name="downloading_data_error_format"><![CDATA[<!DOCTYPE html><html><head><meta charset="UTF-8"><body>Došlo k chybě při načítání dat ze serveru %1$s.<br>Chyba: %2$s</body></html>]]></string>
+    <string name="downloaded_data_info_format"><![CDATA[
+    <div style=\"font-style: italic; font-size: 75%%; border: 1px solid silver; color: Black; background-color: LightYellow; padding: 1em; clear: both;\">
+        Data byla načtena <span style=\"white-space: nowrap;\">%2$s</span> z adresy <span style=\"white-space: nowrap;\">%1$s</span>.
+    </div>
+    <div style=\"height: 5em;\"></div>]]></string>
+    <string name="title_activity_settings">Nastavení</string>
+    <string name="tab_title_rozpis">Rozpis</string>
+    <string name="tab_title_tabulky">Tabulky</string>
+    <string name="tab_title_soutez">Souťež</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Example General settings -->
+    <string name="pref_header_general">Obecné</string>
+    <string name="pref_refresh_on_start_title">Aktualizovat po spuštění aplikace</string>
+    <string name="pref_refresh_on_start_description">Aktualizovat data ze serveru www.hosys.cz po spuštění aplikace.</string>
+    <string name="pref_refresh_all_pages_title">Tlačítko aktualizace načítá všechny stránky</string>
+    <string name="pref_refresh_all_pages_description">Pokud se stiskne tlačítko aktualizace a současně je tato volba zapnuta,
+        dojde k aktualizaci všech karet aplikace, pokud je volba vypnuta, aktualizují se data pouze na aktuálně zobrazené kartě.</string>
+
+    <string name="pref_title_display_name">Display name</string>
+    <string name="pref_default_display_name">John Smith</string>
+
+    <string name="pref_title_add_friends_to_messages">Add friends to messages</string>
+    <string-array name="pref_example_list_titles">
+        <item>Always</item>
+        <item>When possible</item>
+        <item>Never</item>
+    </string-array>
+    <string-array name="pref_example_list_values">
+        <item>1</item>
+        <item>0</item>
+        <item>-1</item>
+    </string-array>
+
+    <!-- Example settings for Data & Sync -->
+    <string name="pref_header_hosys">Hosys</string>
+
+    <string name="pref_title_sync_frequency">Sync frequency</string>
+    <string-array name="pref_sync_frequency_titles">
+        <item>1 minuta</item>
+        <item>3 minuty</item>
+        <item>5 minut</item>
+        <item>10 minut</item>
+        <item>30 minut</item>
+        <item>1 hodina</item>
+        <item>Nikdy</item>
+    </string-array>
+    <string-array name="pref_sync_frequency_values">
+        <item>1</item>
+        <item>3</item>
+        <item>5</item>
+        <item>30</item>
+        <item>60</item>
+        <item>-1</item>
+    </string-array>
+
+    <string name="pref_title_system_sync_settings">System sync settings</string>
+
+    <!-- Example settings for Notifications -->
+    <string name="pref_header_notifications">Zprávy</string>
+
+    <string name="pref_title_new_message_notifications">New message notifications</string>
+
+    <string name="pref_title_ringtone">Ringtone</string>
+    <string name="pref_ringtone_silent">Silent</string>
+
+    <string name="pref_title_vibrate">Vibrate</string>
+    <string name="pref_title_system_sync_soutez">Soutěž</string>
+    <string name="pref_soutez_value">soutez_value</string>
+    <string name="pref_soutez_label">soutez_label</string>
+    <string name="pref_soutez_label_default">(soutěž nebyla vybrána)</string>
+    <string name="pref_rozpis_pocet_dnu_dozadu_title">Rozpis: počet dnů dozadu</string>
+    <string name="pref_rozpis_pocet_dnu_dozadu_summary">Počet načítaných dnů dozadu do tabulky rozpisů:</string>
+    <string name="pref_rozpis_pocet_dnu_dopredu_title">Rozpis: počet dnů dopředu</string>
+    <string name="pref_rozpis_pocet_dnu_dopredu_summary">Počet načítaných dnů dopředu do tabulky rozpisů:</string>
+
+    <string name="html_data_encoding">text/html; charset=UTF-8</string>
+    <string name="progress_dialog_downloading_data_title">Stahování stránky</string>
+    <string name="progress_dialog_downloading_data_info">Vydržte, stroje pracují za Vás ...</string>
+    <string name="dialog_soutez_uroven_1">Úroveň 1</string>
+    <string name="dialog_soutez_uroven_2">Úroveň 2</string>
+    <string name="dialog_soutez_soutez">Soutěž</string>
+    <string name="action_about">O programu</string>
+    <string name="html_app_info"><![CDATA[
+    <h3>Hosys prohlížeč stránek<br>(neoficiální)</h3>
+Version ${VERSION}<br>
+Copyright 2016<br>
+petr.franta@gmail.com<br><br>
+Vytvořeno pro vlastní potřebu,<br>abych se mohl dostat rychle k informacím,<br>které potřebuji :-)
+    ]]></string>
+    <string name="text_licence">Program je zdarma a není nijak časově ani funkčně omezen. Tento software je poskytován bez jakékoliv záruky. Autor nenese zodpovědnost za případné škody vzniklé jakýmkoliv způsobem použití tohoto softwaru. Autor neručí za data se kterými program pracuje. Použití programu je na vlastní nebezpečí.</string>
+</resources>
