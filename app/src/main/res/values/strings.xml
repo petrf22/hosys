@@ -12,7 +12,7 @@
     <string name="title_activity_settings">Nastavení</string>
     <string name="tab_title_rozpis">Rozpis</string>
     <string name="tab_title_tabulky">Tabulky</string>
-    <string name="tab_title_soutez">Souťež</string>
+    <string name="tab_title_soutez">Soutěž</string>
 
     <!-- Strings related to Settings -->
 
@@ -91,7 +91,7 @@
     <string name="html_app_info"><![CDATA[
     <h3>Hosys prohlížeč stránek<br>(neoficiální)</h3>
 Version ${VERSION}<br>
-Copyright 2016<br>
+Copyright 2018<br>
 petr.franta@gmail.com<br><br>
 Vytvořeno pro vlastní potřebu,<br>abych se mohl dostat rychle k informacím,<br>které potřebuji :-)
     ]]></string>

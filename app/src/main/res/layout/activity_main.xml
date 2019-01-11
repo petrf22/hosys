@@ -6,7 +6,7 @@
                                                  android:layout_width="match_parent"
                                                  android:layout_height="match_parent"
                                                  android:fitsSystemWindows="true"
-                                                 tools:context="hosys.pfservis.cz.hosys.cz.pfservis.hosys.hosys.MainActivity">
+                                                 tools:context="cz.pfservis.hosys.activities.MainActivity">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appbar"

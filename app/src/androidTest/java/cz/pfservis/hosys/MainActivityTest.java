@@ -26,7 +26,7 @@ public class MainActivityTest {
     public ActivityTestRule mActivityRule = new ActivityTestRule<>(MainActivity.class);
 
     @Test
-    public void sayHello(){
+    public void sayHello() {
         onView(withText("Say hello!")).perform(click());
 
         //onView(withId(R.id.textView)).check(matches(withText("Hello, World!")));

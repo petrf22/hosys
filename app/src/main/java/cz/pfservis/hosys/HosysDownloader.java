@@ -6,40 +6,48 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
-import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.zip.GZIPInputStream;
+import java.util.Collections;
 
+import cz.pfservis.hosys.dto.HtmlDataDto;
+import cz.pfservis.hosys.dto.RozpisDto;
 import cz.pfservis.hosys.enums.HosysPage;
-import cz.pfservis.hosys.enums.HosysPageHelper;
-import cz.pfservis.hosys.exception.NotSetCookieException;
-
-import static android.R.attr.x;
+import okhttp3.Cache;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.ConnectionSpec;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * Created by petr on 4.10.16.
  */
 public class HosysDownloader extends AsyncTask<HosysPage, Integer, HosysHtmlProcesor> {
     private static final String TAG = "HosysDownloader";
-    private HosysHtmlText hosysHtmlText;
-    private String soutezKey;
-    private Context context;
+    private static final int CACHE_SIZE = 10 * 1024 * 1024; // 10 MiB
+
+    private final HosysHtmlText hosysHtmlText;
+    private final String soutezKey;
+    private final Context context;
+    private final OkHttpClient client;
 
     public HosysDownloader (HosysHtmlText hosysHtmlText, String soutezKey, Context context) {
         this.hosysHtmlText = hosysHtmlText;
         this.soutezKey = soutezKey;
         this.context = context;
+
+        this.client = new OkHttpClient.Builder()
+                .addInterceptor(new OkHttpLoggingInterceptor())
+                .cache(new Cache(context.getCacheDir(), CACHE_SIZE))
+                .connectionSpecs(Collections.singletonList(new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS).build()))
+                .build();
     }
 
     @Override
@@ -54,178 +62,117 @@ public class HosysDownloader extends AsyncTask<HosysPage, Integer, HosysHtmlProc
         HosysHtmlProcesor hosysHtmlProcesor = new HosysHtmlProcesor(hosysPage);
 
         try {
-            String cookie = getCookie(hosysPage);
-            String htmlData = getHtmlData(cookie, hosysPage);
-            String cssData = getCssFromInternet(hosysPage);
+            Object jsonData = getHtmlData(hosysPage);
+            hosysHtmlProcesor.setJsonObject(jsonData);
 
-            hosysHtmlProcesor.setHtml(htmlData);
-            hosysHtmlProcesor.setCss(cssData);
-        } catch (IOException e) {
-            hosysHtmlProcesor.setException(e);
+            switch (hosysPage) {
+//                case rozpis:
+//                    // Zpracuje JSON objekt
+//                    break;
+                case rozpis:
+                    String htmlDataRozpis = HosysPageHelper.createRozpisHtmlTable((RozpisDto[]) jsonData);
+                    String cssDataRozpis = getCssFromInternet(hosysPage);
 
+                    hosysHtmlProcesor.setHtml(htmlDataRozpis);
+                    hosysHtmlProcesor.setCss(cssDataRozpis);
+                    break;
+                case tabulky:
+                case soutez:
+                    String htmlData = ((HtmlDataDto) jsonData).getHtml();
+                    String cssData = getCssFromInternet(hosysPage);
+
+                    hosysHtmlProcesor.setHtml(htmlData);
+                    hosysHtmlProcesor.setCss(cssData);
+                    break;
+                case soutezNastaveni:
+                    break;
+                default:
+                    throw new IllegalStateException("Nepodporovaný parametr " + hosysPage);
+            }
+
+        } catch (Exception e) {
             if (e instanceof MalformedURLException) {
                 Log.e(TAG, "Chybná URL adresa.", e);
             } else {
                 Log.e(TAG, "Nepodařilo se načíst stránku.", e);
             }
-        } catch (NotSetCookieException e) {
-            hosysHtmlProcesor.setException(e);
 
-            Log.e(TAG, "Nepodařilo se nsatvit cookie.", e);
+            hosysHtmlProcesor.setException(e);
         }
 
         return hosysHtmlProcesor;
     }
 
-    String postUrl = HosysConfig.DATA_PAGE_URL;
-
-
-    private String getHtmlData(String cookie, HosysPage hosysPage) throws IOException {
-        Validate.notEmpty(cookie);
-
-        HttpURLConnection conn = prepareConnection(HosysConfig.DATA_PAGE_URL);
-        conn.addRequestProperty("Cookie", cookie);
-        conn.setRequestMethod("POST");
-        conn.addRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-        conn.setDoOutput(true);
-
+    private <T> T getHtmlData(HosysPage hosysPage) throws IOException {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-        Integer dnyZpet = pref.getInt("pref_rozpis_pocet_dnu_dozadu", 7);
+        Integer dnyZpet = pref.getInt("pref_rozpis_pocet_dnu_dozadu", 7) * -1;
         Integer dnyDopredu = pref.getInt("pref_rozpis_pocet_dnu_dopredu", 21);
-        String postData = HosysPageHelper.getPostData(hosysPage, soutezKey, dnyZpet, dnyDopredu);
-        DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
-        wr.writeBytes(postData);
-        wr.flush ();
-        wr.close ();
+        String apiUrl = String.format(hosysPage.getPage(), soutezKey);
+        HttpUrl.Builder httpUrl = HttpUrl.parse(apiUrl).newBuilder();
 
-        conn.connect();
-
-        int response = conn.getResponseCode();
-
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "The response is: " + response);
-
-            for (Map.Entry<String, List<String>> es : conn.getHeaderFields().entrySet()) {
-                Log.d(TAG, "HTTP header: " + es.getKey() + "=" + es.getValue());
-            }
-        }
-
-        InputStream is = null;
-        String htmlText = null;
-
-        try {
-            is = conn.getInputStream();
-
-            if ("gzip".equals(conn.getContentEncoding())) {
-                is = new GZIPInputStream(is);
-            }
-
-            htmlText = IOUtils.toString(is, HosysConfig.UTF8);
-        } finally {
-            IOUtils.closeQuietly(is);
-        }
-
-        return htmlText;
-    }
-
-    private String getCookie(HosysPage hosysPage) throws IOException, NotSetCookieException {
-        String urlPage = HosysConfig.SERVER + hosysPage.getPage();
-        HttpURLConnection conn = prepareConnection(urlPage);
-
-        conn.setRequestMethod("HEAD");
-
-        conn.connect();
-
-        int response = conn.getResponseCode();
-        Log.d(TAG, "The response is: " + response);
-
-        Map<String, List<String>> headerFields = conn.getHeaderFields();
-
-        if (headerFields != null) {
-            List<String> cookies = headerFields.get("Set-Cookie");
-
-            if (cookies != null) {
-                for (String cookie: cookies) {
-                    return cookie;
-                }
-            }
+        switch (hosysPage) {
+            case rozpis:
+                httpUrl.addQueryParameter("soutez", soutezKey)
+                       .addQueryParameter("dayMin", String.valueOf(dnyZpet))
+                       .addQueryParameter("dayMax", String.valueOf(dnyDopredu));
+                break;
+            case tabulky:
+            case soutez:
+                // "soutezKey" je součádtí API URL
+                break;
+            case soutezNastaveni:
+                break;
+            default:
+                throw new IllegalStateException("Nepodporovaný parametr " + hosysPage);
         }
 
 
-        throw new NotSetCookieException();
-    }
+        Request request = new Request.Builder()
+                .header("accept", "application/json")
+                .url(httpUrl.build())
+                .build();
 
-    private HttpURLConnection prepareConnection(String urlPage) throws IOException {
-        URL url = new URL(urlPage);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        Log.d(TAG, "URL adresa: " + request.url().toString());
 
-        conn.setRequestProperty("Accept-Encoding", "gzip");
-        conn.setRequestProperty("Accept-Charset", HosysConfig.UTF8);
-        conn.setReadTimeout(10*1000); // give it 15 seconds to respond
-        conn.setConnectTimeout(15*1000); // give it 15 seconds to connect
-        conn.setUseCaches(false);
+//        client.newCall(request).enqueue(new Callback() {
+//            @Override
+//            public void onFailure(Call call, IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//            @Override
+//            public void onResponse(Call call, final Response response) throws IOException {
+//                if (!response.isSuccessful()) {
+//                    throw new IOException("Unexpected code " + response);
+//                } else {
+//                    // do something wih the result
+//                    String responeText = response.body().string();
+//                    Log.d(TAG, "responeText: " + responeText);
+//                }
+//            }
+//        });
 
-        return conn;
+        Response response = client.newCall(request).execute();
+
+//        String responeText = response.body().string();
+//        Log.d(TAG, "responeText: " + responeText);
+
+        return hosysPage.fromJson(response.body().charStream());
     }
 
     private String getCssFromInternet(HosysPage hosysPage) {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-        String etagKey = "hosysPage." + hosysPage.toString() + ".Etag";
-        String etagValue = pref.getString(etagKey, null);
-        Log.d(TAG, "etagValue (before): " + etagValue);
-
-        String cssText = DiskCache.readCacheCssData(hosysPage, context);
+        String cssText;
 
         try {
-            URL url = new URL(hosysPage.getCssUrl());
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            Request request = new Request.Builder()
+                    .url(hosysPage.getCssUrl())
+                    .build();
 
-            conn.setRequestProperty("User-Agent", "Android.Hosys.pfservis.cz");
-            conn.setRequestProperty("Host", "hosys.pfservis.cz");
-            conn.setRequestProperty("Accept-Encoding", "gzip, deflate");
-            conn.setRequestProperty("Accept", "*/*");
-            conn.setRequestProperty("Accept-Charset", HosysConfig.UTF8);
+            Response response = client.newCall(request).execute();
 
-            if (etagValue != null && cssText != null) {
-                conn.setRequestProperty("If-None-Match", etagValue);
-            }
+            cssText = response.body().string();
 
-            conn.setRequestMethod("GET");
-            conn.setReadTimeout(5*1000); // give it 15 seconds to respond
-            conn.setConnectTimeout(5*1000); // give it 15 seconds to connect
-            conn.setUseCaches(false);
-            conn.connect();
-
-            int response = conn.getResponseCode();
-            Log.d(TAG, "response: " + response);
-
-
-            if (response == 200) { // Not Modified
-                etagValue = conn.getHeaderField("ETag");
-                Log.d(TAG, "etagValue (after): " + etagValue);
-
-                SharedPreferences.Editor editor = pref.edit();
-                editor.putString(etagKey, etagValue);
-                editor.commit();
-
-                InputStream is = null;
-
-                try {
-                    is = conn.getInputStream();
-
-                    if ("gzip".equals(conn.getContentEncoding())) {
-                        is = new GZIPInputStream(is);
-                    }
-
-                    cssText = IOUtils.toString(is, HosysConfig.UTF8);
-
-                    DiskCache.writeCacheCssData(cssText, hosysPage, context);
-                } finally {
-                    IOUtils.closeQuietly(is);
-                }
-//            } else if (response == 304) { // Not Modified
-//            } else { // asi chybka
-            }
+            DiskCache.writeCacheCssData(cssText, hosysPage, context);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             cssText = null;
@@ -234,7 +181,11 @@ public class HosysDownloader extends AsyncTask<HosysPage, Integer, HosysHtmlProc
             cssText = null;
         }
 
-        return cssText == null ? DiskCache.readCacheCssData(hosysPage, context) : cssText;
+        if (StringUtils.isBlank(cssText)) {
+            cssText = DiskCache.readCacheCssData(hosysPage, context);
+        }
+
+        return cssText;
     }
 
     @Override

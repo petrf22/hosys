@@ -1,68 +1,67 @@
 package cz.pfservis.hosys.enums;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.internal.Primitives;
+import com.google.gson.stream.JsonReader;
+
+import java.io.Reader;
+
 import cz.pfservis.hosys.HosysConfig;
+import cz.pfservis.hosys.dto.HtmlDataDto;
+import cz.pfservis.hosys.dto.RozpisDto;
+import cz.pfservis.hosys.dto.SoutezDto;
 
 /**
  * Created by petr on 8.10.16.
  */
 public enum HosysPage {
-    rozpis("Rozpis.htm", "My_Xxx_Reserved_Form=Tygrik-Ajax" +
-            "&My_Face=Nooks" +
-            "&My_IDs=XY_Rozpis" +
-            "&My_Cislo=" +
-            "&My_FiltrSoutez={0}" +
-            "&My_FiltrDatumOd={1,date," + HosysConfig.POST_DATE_FORMAT + "}" +
-            "&My_FiltrDatumDo={2,date," + HosysConfig.POST_DATE_FORMAT + "}" +
-            "&My_FiltrDelegujeLed=~" +
-            "&My_FiltrUzemi=~" +
-            "&My_FiltrDelegujeFce=~" +
-            "&My_FiltrPratelske=A" +
-            "&My_Varianta=STR" +
-            "&My_FiltrRidi=~" +
-            "&My_FiltrDatum=DOD" +
-            "&My_FiltrStadion=~" +
-            "&My_FiltrCislo=~" +
-            "&My_Soutez=" +
-            "&My_PIX=0" +
-            "&My_PortHeight=444" +
-            "&My_FiltrMinihokej=A" +
-            "&My_Razeni=DUC" +
-            "&My_FiltrSouperi=~" +
-            "&My_FiltrOba=OBA" +
-            "&My_FiltrStav=VSE" +
-            "&My_FiltrRequest=Filtrovat"),
-    tabulky("Tabulky.htm", "My_Xxx_Reserved_Form=Tygrik-Ajax" +
-            "&My_Face=Nooks" +
-            "&My_IDs=XY_Tabulky" +
-            "&My_PortHeight=369" +
-            "&My_FiltrSoutez={0}" +
-            "&My_FiltrRequest=Filtrovat"),
-    soutez("Souteze.htm", "My_Xxx_Reserved_Form=Tygrik-Ajax" +
-            "&My_Face=Nooks" +
-            "&My_IDs=XY_Souteze" +
-            "&My_PortHeight=369" +
-            "&My_FiltrSoutez={0}" +
-            "&My_FiltrRequest=Filtrovat");
+    rozpis(HosysConfig.API_URL_ROZPIS) {
+        @Override
+        public RozpisDto[] fromJson(Reader json) throws JsonSyntaxException, JsonIOException {
+            Gson gson = new Gson();
+            return (RozpisDto[]) gson.fromJson(json, RozpisDto[].class);
+        }
+    },
+    tabulky(HosysConfig.API_URL_HTML_TABULKA) {
+        @Override
+        public HtmlDataDto fromJson(Reader json) throws JsonSyntaxException, JsonIOException {
+            Gson gson = new Gson();
+            return (HtmlDataDto) gson.fromJson(json, HtmlDataDto.class);
+        }
+    },
+    soutez(HosysConfig.API_URL_HTML_SOUTEZ) {
+        @Override
+        public HtmlDataDto fromJson(Reader json) throws JsonSyntaxException, JsonIOException {
+            Gson gson = new Gson();
+            return (HtmlDataDto) gson.fromJson(json, HtmlDataDto.class);
+        }
+    },
+    soutezNastaveni(HosysConfig.API_URL_SOUTEZ) {
+        @Override
+        public SoutezDto[] fromJson(Reader json) throws JsonSyntaxException, JsonIOException {
+            Gson gson = new Gson();
+            return (SoutezDto[]) gson.fromJson(json, SoutezDto[].class);
+        }
+    };
 
+    public static HosysPage[] FRAGMENTS = new HosysPage[] {rozpis, tabulky, soutez};
     private final String page;
-    private final String postDataFormat;
     private final String cssUrl;
 
-    private HosysPage(String page, String postDataFormat) {
+    private HosysPage(String page) {
         this.page = page;
-        this.postDataFormat = postDataFormat;
-        this.cssUrl = "https://hosys.pfservis.cz/css/" + this.toString() + ".css";
+        this.cssUrl = HosysConfig.SERVER_CSS + this.toString() + ".css";
     }
 
     public String getPage() {
         return page;
     }
 
-    public String getPostDataFormat() {
-        return postDataFormat;
-    }
-
     public String getCssUrl() {
         return cssUrl;
     }
+
+    abstract public <T> T fromJson(Reader json) throws JsonSyntaxException, JsonIOException;
 }

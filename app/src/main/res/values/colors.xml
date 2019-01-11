@@ -3,4 +3,11 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+
+    <color name="colorHosysStatusOdehrane">#89e987</color>
+    <color name="colorHosysStatusNahlasene">#76bdea</color>
+    <color name="colorHosysStatusRozlosovane">#bfcbca</color>
+    <color name="colorHosysStatusNavrh">#f1877f</color>
+    <color name="colorHosysStatusK_rozhodnuti">#fcdc7c</color>
+    <color name="colorHosysStatusZrusene">#4f738d</color>
 </resources>

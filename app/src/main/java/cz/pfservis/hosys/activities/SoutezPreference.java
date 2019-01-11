@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.preference.DialogPreference;
-import android.text.Html;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -16,22 +15,18 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import cz.pfservis.hosys.HosysConfig;
 import cz.pfservis.hosys.HosysDownloader;
 import cz.pfservis.hosys.HosysHtmlProcesor;
 import cz.pfservis.hosys.HosysHtmlText;
+import cz.pfservis.hosys.dto.SoutezDto;
 import cz.pfservis.hosys.enums.HosysPage;
-import cz.pfservis.hosys.enums.HosysPageHelper;
 import hosys.pfservis.cz.hosys.R;
 
 /**
@@ -83,7 +78,7 @@ public class SoutezPreference extends DialogPreference implements HosysHtmlText 
         spinnerUroven3.setOnItemSelectedListener(changeSpinner);
 
         HosysDownloader hd = new HosysDownloader(this, "", getContext());
-        hd.execute(HosysPage.soutez);
+        hd.execute(HosysPage.soutezNastaveni);
 
         return view;
     }
@@ -174,82 +169,35 @@ public class SoutezPreference extends DialogPreference implements HosysHtmlText 
 
     @Override
     public void processHtmlText(HosysHtmlProcesor hosysHtmlProcesor) {
-        String errorMsg = null;
+        SoutezDto[] souteze = hosysHtmlProcesor.getJson();
+        Log.d(TAG, "souteze.length: " + souteze.length);
 
         try {
-            if (hosysHtmlProcesor.getException() != null) {
-                errorMsg = "Nepodařilo se načíst data ze serveru " + HosysConfig.SERVER +
-                        " (" + hosysHtmlProcesor.getException().getMessage() + ")";
-
-                return;
-            }
-
-            // Zpracování bez chyby
-            String htmlPage = HosysPageHelper.buildWebViewPage(hosysHtmlProcesor);
-            int posStart = htmlPage.indexOf("<select name=\"My_FiltrSoutez\"");
-            int posStop = htmlPage.indexOf("</select", posStart);
-
-            if (posStart == -1 || posStop == -1) {
-                errorMsg = "Nepodařilo se zpracovat HTML stránku ze serveru " + HosysConfig.SERVER;
-
-                return;
-            }
-
-            Pattern optionPattern = Pattern.compile("<option value=\"([^\"]+)\" class=\"([^\"]+)\"( selected=\"selected\")?>([^<]+)</option>");
-            Matcher m = optionPattern.matcher(htmlPage.subSequence(posStart, posStop));
             Map<String, Map<String, String>> mapUroven2 = null;
             Map<String, String> mapUroven3 = null;
             InitSoutezSpinnerSelect initSoutezSpinnerSelectTmp = new InitSoutezSpinnerSelect();
+            String uroven1Last = null;
+            String uroven2Last = null;
 
-            while (m.find()) {
-                String value = StringUtils.trimToEmpty(m.group(1));
-                String cssClass = StringUtils.trimToEmpty(m.group(2));
-                String text = StringUtils.trimToEmpty(
-                        StringUtils.normalizeSpace(
-                                Html.fromHtml(m.group(4)).toString()));
-
-                Log.d(TAG, "value   : " + value);
-                Log.d(TAG, "cssClass: " + cssClass);
-                Log.d(TAG, "text    : " + text);
-
-                if ("cOptionVse".equals(cssClass) || "cOptionUroven".equals(cssClass)) {
+            for (SoutezDto soutez : souteze) {
+                Log.d(TAG, soutez.toString());
+                if (soutez.getUroven() == 1) {
                     mapUroven3 = new LinkedHashMap<>();
                     mapUroven2 = new LinkedHashMap<>();
-                    mapUroven1.put(text, mapUroven2);
-                    mapUroven2.put(text, mapUroven3);
-                    mapUroven3.put(text, value);
-
-                    if (StringUtils.isBlank(initSoutezSpinnerSelectTmp.uroven3)) {
-                        initSoutezSpinnerSelectTmp.uroven1 = text;
-                    }
-
-                    if (StringUtils.isBlank(initSoutezSpinnerSelectTmp.uroven3) && StringUtils.equals(soutezValue, value)) {
-                        // jen pokud je hodnota z nastavení
-                        initSoutezSpinnerSelectTmp.uroven1 = text;
-                        initSoutezSpinnerSelectTmp.uroven2 = text;
-                        initSoutezSpinnerSelectTmp.uroven3 = text;
-                    }
-                } else if ("cOptionSoutez".equals(cssClass)) {
-                    //mapUroven2 = new LinkedHashMap<>();
+                    mapUroven1.put(soutez.getNazev(), mapUroven2);
+                    uroven1Last = soutez.getNazev();
+                } else if (soutez.getUroven() == 2) {
                     mapUroven3 = new LinkedHashMap<>();
-                    mapUroven2.put(text, mapUroven3);
-                    mapUroven3.put(text, value);
+                    mapUroven2.put(soutez.getNazev(), mapUroven3);
+                    uroven2Last = soutez.getNazev();
+                } else if (soutez.getUroven() == 3) {
+                    mapUroven3.put(soutez.getNazev(), soutez.getHosysSoutezId());
 
-                    if (StringUtils.isBlank(initSoutezSpinnerSelectTmp.uroven3)) {
-                        initSoutezSpinnerSelectTmp.uroven2 = text;
-                    }
-
-                    if (StringUtils.isBlank(initSoutezSpinnerSelectTmp.uroven3) && StringUtils.equals(soutezValue, value)) {
+                    if (StringUtils.isBlank(initSoutezSpinnerSelectTmp.uroven3) && StringUtils.equals(soutezValue, soutez.getHosysSoutezId())) {
                         // jen pokud je hodnota z nastavení
-                        initSoutezSpinnerSelectTmp.uroven2 = text;
-                        initSoutezSpinnerSelectTmp.uroven3 = text;
-                    }
-                } else if ("cOptionCast".equals(cssClass)) {
-                    mapUroven3.put(text, value);
-
-                    if (StringUtils.isBlank(initSoutezSpinnerSelectTmp.uroven3) && StringUtils.equals(soutezValue, value)) {
-                        // jen pokud je hodnota z nastavení
-                        initSoutezSpinnerSelectTmp.uroven3 = text;
+                        initSoutezSpinnerSelectTmp.uroven1 = uroven1Last;
+                        initSoutezSpinnerSelectTmp.uroven2 = uroven2Last;
+                        initSoutezSpinnerSelectTmp.uroven3 = soutez.getNazev();
                     }
                 } else {
                     Log.e(TAG, "Změnily se stránky WWW hosys.cz.");
@@ -263,7 +211,7 @@ public class SoutezPreference extends DialogPreference implements HosysHtmlText 
             ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_dropdown_item, values);
 
             adapter.setDropDownViewResource(android.R.layout.select_dialog_singlechoice);
-            //adapter.setDropDownViewTheme(R.styleable.ColorStateListItem);
+
             spinnerUroven1.setAdapter(adapter);
 
             if (!initSoutezSpinnerSelect.isInit()) {
@@ -273,21 +221,11 @@ public class SoutezPreference extends DialogPreference implements HosysHtmlText 
             }
 
             Log.d(TAG, "mapUroven1: " + mapUroven1);
-            Log.v(TAG, "HTML page: " + htmlPage);
+            // Log.v(TAG, "HTML page: " + htmlPage);
 
             //Toast.makeText(getContext(), htmlPage, Toast.LENGTH_LONG).show();
         } finally {
             progressDialog.dismiss();
-
-            if (errorMsg != null && this.getDialog() != null) {
-                try {
-                    this.getDialog().dismiss();
-
-                    Toast.makeText(getContext(), errorMsg, Toast.LENGTH_LONG).show();
-                } catch (Exception ex) {
-                    Log.e(TAG, "Nepodařilo se zobrazit informaci o chybě.", ex);
-                }
-            }
         }
     }
 

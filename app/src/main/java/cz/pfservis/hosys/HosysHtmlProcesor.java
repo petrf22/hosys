@@ -1,5 +1,10 @@
 package cz.pfservis.hosys;
 
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
+
+import java.io.Reader;
+
 import cz.pfservis.hosys.enums.HosysPage;
 
 /**
@@ -11,6 +16,7 @@ public class HosysHtmlProcesor {
     private String css;
     private int responseCode;
     private Exception exception;
+    private Object jsonObject;
 
     public HosysHtmlProcesor(HosysPage hosysPage) {
         this.hosysPage = hosysPage;
@@ -50,5 +56,13 @@ public class HosysHtmlProcesor {
 
     public HosysPage getHosysPage() {
         return hosysPage;
+    }
+
+    public void setJsonObject(Object jsonObject) {
+        this.jsonObject = jsonObject;
+    }
+
+    public <T> T getJson() {
+        return (T) jsonObject;
     }
 }
