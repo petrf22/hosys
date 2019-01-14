@@ -126,9 +126,9 @@ public class HosysDownloader extends AsyncTask<HosysPage, Integer, HosysHtmlProc
                 throw new IllegalStateException("Nepodporovaný parametr " + hosysPage);
         }
 
-
         Request request = new Request.Builder()
-                .header("accept", "application/json")
+                .header("Accept", "application/json")
+                .header("Connection", "close")
                 .url(httpUrl.build())
                 .build();
 
