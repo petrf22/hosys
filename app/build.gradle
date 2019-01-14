@@ -15,9 +15,9 @@ android {
         applicationId 'cz.pfservis.hosys'
         minSdkVersion 15
         targetSdkVersion 26
-        versionName '1.0.23'
+        versionName '1.0.25'
         signingConfig signingConfigs.config
-        versionCode 23
+        versionCode 25
     }
     buildTypes {
         release {
@@ -35,7 +35,8 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'com.android.support:design:26.1.0'
     implementation 'com.android.support:support-v4:26.1.0'
-    implementation 'commons-io:commons-io:2.6'
+    implementation 'commons-io:commons-io:2.2'
+    // implementation 'commons-io:commons-io:2.6' - verze nefunguje s androidem 4:
     implementation 'org.apache.commons:commons-lang3:3.7'
     androidTestImplementation 'com.android.support:support-annotations:26.1.0'
     androidTestImplementation 'com.android.support.test:runner:0.5'
