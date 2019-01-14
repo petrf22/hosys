@@ -3,10 +3,10 @@
     <string name="action_settings">Nastavení</string>
     <string name="action_refresh">Aktualizace</string>
     <string name="downloading_data_format"><![CDATA[<!DOCTYPE html><html><head><meta charset="UTF-8"><body>Načítám data ze serveru %1$s ...</body></html>]]></string>
-    <string name="downloading_data_error_format"><![CDATA[<!DOCTYPE html><html><head><meta charset="UTF-8"><body>Došlo k chybě při načítání dat ze serveru %1$s.<br>Chyba: %2$s</body></html>]]></string>
+    <string name="downloading_data_error_format"><![CDATA[<!DOCTYPE html><html><head><meta charset="UTF-8"><body>Došlo k chybě při načítání dat ze serveru.<br>Chyba: %1$s</body></html>]]></string>
     <string name="downloaded_data_info_format"><![CDATA[
     <div style=\"font-style: italic; font-size: 75%%; border: 1px solid silver; color: Black; background-color: LightYellow; padding: 1em; clear: both;\">
-        Data byla načtena <span style=\"white-space: nowrap;\">%2$s</span> z adresy <span style=\"white-space: nowrap;\">%1$s</span>.
+        Data byla načtena <span style=\"white-space: nowrap;\">%1$s</span>.
     </div>
     <div style=\"height: 5em;\"></div>]]></string>
     <string name="title_activity_settings">Nastavení</string>

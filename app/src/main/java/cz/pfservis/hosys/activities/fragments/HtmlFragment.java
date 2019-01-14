@@ -184,11 +184,9 @@ public class HtmlFragment extends Fragment implements HosysHtmlText, HosysFragme
             return;
         }
 
-        String pageName = HosysConfig.SERVER + hosysHtmlProcesor.getHosysPage().getPage();
-
         if (hosysHtmlProcesor.getException() != null) {
             if (htmlData == null) {
-                htmlData = getString(R.string.downloading_data_error_format, pageName, hosysHtmlProcesor.getException().getMessage());
+                htmlData = getString(R.string.downloading_data_error_format, hosysHtmlProcesor.getException().getMessage());
             }
 
             String errorMsg = "Nepodařilo se načíst data ze serveru " + HosysConfig.SERVER +
@@ -200,7 +198,7 @@ public class HtmlFragment extends Fragment implements HosysHtmlText, HosysFragme
             String dateTime = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT, HosysConfig.CZECH).format(date);
 
             htmlData = HosysPageHelper.buildWebViewPage(hosysHtmlProcesor);
-            htmlData = htmlData.replace("</body", getString(R.string.downloaded_data_info_format, pageName, dateTime) + "</body");
+            htmlData = htmlData.replace("</body", getString(R.string.downloaded_data_info_format, dateTime) + "</body");
 
             DiskCache.writeCacheHtmlData(htmlData, hosysHtmlProcesor.getHosysPage(), getContext());
         }
